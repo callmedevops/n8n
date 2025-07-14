@@ -56,11 +56,11 @@ This guide sets up a production-ready n8n instance on Kubernetes, featuring:
 n8n/
 ├── kubernetes/
 │   ├── n8n/
-│   │   ├── n8n-claim0-persistentvolumeclaim.yaml
+│   │   ├── n8n-persistentvolumeclaim.yaml
 │   │   ├── n8n-deployment.yaml
 │   │   └── n8n-service.yaml
 │   └── postgres/
-│       ├── postgres-claim0-persistentvolumeclaim.yaml
+│       ├── postgres-persistentvolumeclaim.yaml
 │       ├── postgres-configmap.yaml
 │       ├── postgres-deployment.yaml
 │       └── postgres-service.yaml
@@ -97,6 +97,20 @@ Export your domain:
 ```bash
 export YOUR_DOMAIN="example.com"
 ```
+### Additional Dependencies
+
+Before deploying n8n, ensure the following components are installed and configured in your Kubernetes cluster:
+
+- **Nginx Ingress Controller**  
+  Provides ingress routing and load balancing for your services.  
+  [Installation guide](https://kubernetes.github.io/ingress-nginx/deploy/)
+
+- **Cert-Manager**  
+  Manages SSL/TLS certificates automatically, enabling HTTPS for your domain.  
+  [Installation guide](https://cert-manager.io/docs/installation/)
+
+These are required to enable SSL termination and expose your n8n instance securely to the internet.
+
 
 ---
 
@@ -105,8 +119,8 @@ export YOUR_DOMAIN="example.com"
 ### 1. Configure n8n manifests
 
 ```bash
-cp kubernetes/n8n/n8n-service.yaml kubernetes/n8n/n8n-service-configured.yaml
 cp kubernetes/n8n/n8n-deployment.yaml kubernetes/n8n/n8n-deployment-configured.yaml
+cp kubernetes/n8n/n8n-ingress.yaml kubernetes/n8n/n8n-ingress-configured.yaml
 ```
 
 Replace `<YOUR_DOMAIN>` with your actual domain:
@@ -115,14 +129,14 @@ Linux:
 
 ```bash
 sed -i "s/<YOUR_DOMAIN>/$YOUR_DOMAIN/g" kubernetes/n8n/n8n-deployment-configured.yaml
-sed -i "s/<YOUR_DOMAIN>/$YOUR_DOMAIN/g" kubernetes/n8n/n8n-service-configured.yaml
+sed -i "s/<YOUR_DOMAIN>/$YOUR_DOMAIN/g" kubernetes/n8n/n8n-ingress-configured.yaml
 ```
 
 macOS:
 
 ```bash
 sed -i '' "s|<YOUR_DOMAIN>|$YOUR_DOMAIN|g" kubernetes/n8n/n8n-deployment-configured.yaml
-sed -i '' "s|<YOUR_DOMAIN>|$YOUR_DOMAIN|g" kubernetes/n8n/n8n-service-configured.yaml
+sed -i '' "s|<YOUR_DOMAIN>|$YOUR_DOMAIN|g" kubernetes/n8n/n8n-ingress-configured.yaml
 ```
 
 ### 2. Create Namespace & Secret
@@ -143,9 +157,10 @@ kubectl create secret generic postgres-secret \
 
 ```bash
 kubectl apply -f kubernetes/postgres/
-kubectl apply -f kubernetes/n8n/n8n-claim0-persistentvolumeclaim.yaml
+kubectl apply -f kubernetes/n8n/n8n-persistentvolumeclaim.yaml
 kubectl apply -f kubernetes/n8n/n8n-deployment-configured.yaml
-kubectl apply -f kubernetes/n8n/n8n-service-configured.yaml
+kubectl apply -f kubernetes/n8n/n8n-service.yaml
+kubectl apply -f kubernetes/n8n/n8n-ingress-configured.yaml
 ```
 
 Wait for pods:
