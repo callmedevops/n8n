@@ -35,7 +35,7 @@ This guide sets up a production-ready n8n instance on Kubernetes, featuring:
 
 ```
 ┌─────────────┐     ┌──────────────┐
-│  Route 53   │───▶│  LoadBalancer │
+│  Route 53   │────▶│ LoadBalancer │
 │   (DNS)     │     │ (Nginx+SSL)  │
 └─────────────┘     └──────────────┘
                           │
